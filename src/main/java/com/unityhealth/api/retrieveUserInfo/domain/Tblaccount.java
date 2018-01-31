@@ -10,10 +10,13 @@ import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -21,6 +24,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import org.hibernate.annotations.Where;
 
 /**
  *
@@ -42,8 +46,12 @@ public class Tblaccount implements Serializable {
     @NotNull
     @Column(name = "iSite")
     private int iSite;
-    @Column(name = "iStoreID")
-    private Integer iStoreID;
+//    @Column(name = "iStoreID")
+//    private Integer iStoreID;
+    @ManyToOne(fetch= FetchType.EAGER)
+    @JoinColumn(name="iStoreID", columnDefinition = "INT(11) UNSIGNED")
+    @Where(clause = "iStoreID != -1")
+    private Store store;
     @Size(max = 16)
     @Column(name = "vAccountType")
     private String vAccountType;
@@ -245,6 +253,11 @@ public class Tblaccount implements Serializable {
     private Integer bSherpaSurveyTaken;
     @Column(name = "bSmsOptin")
     private Integer bSmsOptin;
+     @Column(name = "apiUserId")
+    private String apiUserId;
+     @Column(name = "apiSyncStatus")
+    private String apiSyncStatus;
+
 
     public Tblaccount() {
     }
@@ -283,13 +296,13 @@ public class Tblaccount implements Serializable {
         this.iSite = iSite;
     }
 
-    public Integer getIStoreID() {
-        return iStoreID;
-    }
-
-    public void setIStoreID(Integer iStoreID) {
-        this.iStoreID = iStoreID;
-    }
+//    public Integer getIStoreID() {
+//        return iStoreID;
+//    }
+//
+//    public void setIStoreID(Integer iStoreID) {
+//        this.iStoreID = iStoreID;
+//    }
 
     public String getVAccountType() {
         return vAccountType;
@@ -850,6 +863,34 @@ public class Tblaccount implements Serializable {
     @Override
     public String toString() {
         return "com.unityhealth.api.retrieveUserInfo.domain.Tblaccount[ iID=" + iID + " ]";
+    }
+
+    /**
+     * @return the apiUserId
+     */
+    public String getApiUserId() {
+        return apiUserId;
+    }
+
+    /**
+     * @param apiUserId the apiUserId to set
+     */
+    public void setApiUserId(String apiUserId) {
+        this.apiUserId = apiUserId;
+    }
+
+    /**
+     * @return the apiSyncStatus
+     */
+    public String getApiSyncStatus() {
+        return apiSyncStatus;
+    }
+
+    /**
+     * @param apiSyncStatus the apiSyncStatus to set
+     */
+    public void setApiSyncStatus(String apiSyncStatus) {
+        this.apiSyncStatus = apiSyncStatus;
     }
     
 }

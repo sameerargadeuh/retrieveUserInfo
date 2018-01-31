@@ -5,24 +5,43 @@
  */
 package com.unityhealth.api.retrieveUserInfo.rest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unityhealth.api.retrieveUserInfo.connect.XMLApiBean;
 import com.unityhealth.api.retrieveUserInfo.domain.IUserReportRepository;
 import com.unityhealth.api.retrieveUserInfo.domain.Tblaccount;
+import com.unityhealth.api.retrieveUserInfo.service.ProcessDataFromSFService;
+import com.unityhealth.api.retrieveUserInfo.sf.userModel.Dummy;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.web.client.RestTemplate;
+//import com.fasterxml.jackson.core.json.
+
 
 /**
  *
@@ -32,30 +51,86 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/account")
 public class RetriveUserInfoController {
+     private Logger log = LoggerFactory.getLogger(RetriveUserInfoController.class);
+     private final RestTemplate restTemplate;
     @Autowired
     private IUserReportRepository userReportRepository;
     @Autowired
-     RetriveUserInfoController(IUserReportRepository userReportRepository){
+    private Environment env;
+    @Autowired
+    private ProcessDataFromSFService sfService;
+    @Autowired
+     RetriveUserInfoController(IUserReportRepository userReportRepository,RestTemplateBuilder restTemplateBuilder,ProcessDataFromSFService sfService){
          userReportRepository = this.userReportRepository;
-         
+        this.sfService = sfService;
+         restTemplate =  restTemplateBuilder.basicAuthorization("seargade@australianT1", "sam123").build();
      }
       @RequestMapping(value= {"/getAccountbyUserID"}, method = RequestMethod.GET,
             consumes = MediaType.ALL_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public Tblaccount getAccountbyUserID(String userID){
-        System.out.println(userID);
-        
+        //System.out.println(userID);
+        log.debug("userID recieved from the webservice" + userID);
+        log.debug("before Find By " + userID);
+        Calendar calendar = Calendar.getInstance();
+        long yourmilliseconds = 1503802789000l+0000l;
+        //calendar.setTimeInMillis(yourmilliseconds);
+        SimpleDateFormat dt1 = new SimpleDateFormat("dd-MM-yyyy");
+        log.debug("-------------------------------------yo mate the date --------------------------------------------------" + dt1.format(calendar.getTime()));
+        log.debug("-------------------------------------yo mate the date --------------------------------------------------" + dt1.format(new Date()));
         return userReportRepository.findByVUsername(userID);
     }
-     @RequestMapping(value= {"/getAccountEmailbyUserID"}, method = RequestMethod.GET,
+    @Transactional 
+    @RequestMapping(value= {"/getAccountEmailbyUserID"}, method = RequestMethod.GET,
             consumes = MediaType.ALL_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getEmailbyUserID(String userID){
+    public String getEmailbyUserID(String userID,String name){
         System.out.println(userID);
-        Tblaccount account = userReportRepository.findByVUsername(userID);
+        if(userID !=null && !userID.equals("")){
+        //Tblaccount account = userReportRepository.findByVUsername(userID);
+        Tblaccount account = userReportRepository.findByApiUserId(userID);
+        //System.out.println(Argade, Sameer S)
+        System.out.println(name);
+         log.debug("---------------------------------userID recieved from the webservice ------------------------------------ " + userID);
+        log.debug("----------------------------------before Find By---------------------------------------------------------- " + userID);
+        //System.out.println(nameArr[2]);
+        if(account == null){
+            account = new Tblaccount();
+            account.setApiUserId(userID);
+            if(name != null && !name.equals("")){
+                
+            String[] nameArr = name.split(",");
+        System.out.println(nameArr[0]);
+        System.out.println(nameArr[1]);
+            account.setVFirstName(nameArr[0]);
+            account.setVLastName(nameArr[1]);
+            }else{
+                 account.setVFirstName(userID);
+            account.setVLastName(userID);
+            }
+            account.setDtJoinDate(new Date());
+            
+            String email = userID+"@api.net.au";
+            account.setVEmail(email);
+            account.setVUsername(email);
+            account.setVStatus("active");
+            account.setApiSyncStatus("OC");
+            account = userReportRepository.save(account);
+            
+            String breezID = joinUser(account);
+            if(breezID !="failure"){
+                Integer iBreezeID = Integer.parseInt(breezID);
+                         account.setIBreezeUserID(iBreezeID); 
+                         userReportRepository.save(account);
+                        }
+            
+        }
+        
         return account.getVEmail();
+        }
+        return null;
     }
-     public String joinUser(@RequestBody Tblaccount in) {
+     public String joinUser( Tblaccount in) {
         //EmailSenderResponseDto esrDto = new EmailSenderResponseDto();
         
 
@@ -64,27 +139,26 @@ public class RetriveUserInfoController {
            
             String userId = null;
 try {
-            
+            String ptPass = getRandomPassword();
 
-         //   System.out.println(env.getProperty("adobeConnect") + " " + env.getProperty("adobeConnectAdmin") + " " + env.getProperty("adobeConnectAdminPassword"));
-            XMLApiBean breezeAdmin = new XMLApiBean("", "","", null);
-           
+           System.out.println(env.getProperty("adobeConnect") + " " + env.getProperty("adobeConnectAdmin") + " " + env.getProperty("adobeConnectAdminPassword"));
+       //     XMLApiBean breezeAdmin = new XMLApiBean("https://connect.itherapeutics.com.au", "info@itherapeutics.com.au","qwasz2004!", null);
+           XMLApiBean breezeAdmin =  new XMLApiBean(env.getProperty("adobeConnect"), env.getProperty("adobeConnectAdmin"), env.getProperty("adobeConnectAdminPassword"), null);
 
                 String adminSession = breezeAdmin.getBreezesession();
                 System.out.println(adminSession);
-                userId = breezeAdmin.registerUser(in.getVFirstName(), in.getVLastName(), in.getVUsername(), encodeURL(""), in.getVUsername());
-                System.out.println(in.getIBreezeUserID()+ "in.getBreezeID() ");
-       in =   userReportRepository.save(in);
+                userId = breezeAdmin.registerUser(in.getVFirstName(), in.getVLastName(), in.getVUsername(), encodeURL(ptPass), in.getVUsername());
+                System.out.println(userId + " userId " + in.getVUsername());
+                breezeAdmin.addUserToGroup(userId, env.getProperty("breezeLearnersGroupSCO"));
+      // in =   userReportRepository.save(in);
         } catch (Exception e) {
             e.printStackTrace();
-             if (in.getIBreezeUserID() != null){
-                 return "failure";
-             }else{
+            
                   return "failure";
-             }
+            
          
         }
-        return in.getIBreezeUserID().toString();
+        return userId.toString();
     }
 
     /**
@@ -142,4 +216,86 @@ try {
         }
         return encoded;
     }
+     @RequestMapping(value= {"/getSFbyUserID"}, method = RequestMethod.GET,
+            consumes = MediaType.ALL_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+   List<Dummy>  restClientMethod(){
+     //String str =   restTemplate.getForObject("https://api10preview.sapsf.com/odata/v2/User('SEARGADE')?$format=json",String.class);
+     String recordCount = restTemplate.getForObject("https://api10preview.sapsf.com/odata/v2/User/$count?$format=json",String.class);
+     Integer count = Integer.parseInt(recordCount);
+     Integer noOfPages = count/1000;
+     Integer remainingRecords = count %(noOfPages * 1000);
+     if (remainingRecords > 0){
+         noOfPages++;
+     }
+         log.debug(" Total Number of pages ........................................" + noOfPages);
+         Dummy dummy =  null;
+         List<Dummy> dummyList = new ArrayList<Dummy>();
+     for(int i = 1; i <= noOfPages; i++ ){
+          log.debug(" Inside the for loop stay tuned ........................................ " + i);
+         if(i == 1){
+           dummy =    restTemplate.getForObject("https://api10preview.sapsf.com/odata/v2/User?$format=json",Dummy.class);
+          log.debug("i is one ........................................" + dummy.getD());
+          log.debug("The next page is at ........................................" + dummy.getD().getNext());
+         }else if(dummy != null && dummy.getD() != null  && dummy.getD().getNext()!= null){
+             dummy =    restTemplate.getForObject(dummy.getD().getNext(),Dummy.class);
+         log.debug("D is ........................................" + dummy.getD());
+          log.debug("The next page is at ........................................" + dummy.getD().getNext());
+            }
+         Calendar calendar = Calendar.getInstance();
+        dummyList.add(dummy);
+        
+        SimpleDateFormat dt1 = new SimpleDateFormat("dd-MM-yyyy");
+        
+          ObjectMapper objectMapper = new ObjectMapper();
+           RandomAccessFile aFile;
+           
+                try {
+                     log.debug("Prepare to write to file number .............................." + i);
+                    aFile = new RandomAccessFile("E:\\retrieveUserInfo\\FileFromSF" + i + dt1.format(calendar.getTime()) +  ".json", "rw");
+                     FileChannel inChannel = aFile.getChannel();
+                     String jsonInString = objectMapper.writeValueAsString(dummy);
+                     ByteBuffer buf = ByteBuffer.allocate(jsonInString.length());
+                    buf.clear();
+                    if(jsonInString != null ){
+                    buf.put(jsonInString.getBytes());
+                    }
+                    else{
+                          log.debug("Shouldn't come here at all ........................................" + jsonInString);
+                          
+                    }
+
+                    buf.flip();
+                       log.debug(" about to write to file  ........................................"  + i);
+                    while (buf.hasRemaining()) {
+
+                            inChannel.write(buf);
+
+                    }
+                    inChannel.close();
+                 log.debug(" finished write to file  ........................................"  + i);
+
+                } catch (FileNotFoundException ex) {
+                    java.util.logging.Logger.getLogger(RetriveUserInfoController.class.getName()).log(Level.SEVERE, null, ex);
+                    log.debug("FileNotFoundException ........................................" + ex);
+                } catch (JsonProcessingException ex) {
+                    java.util.logging.Logger.getLogger(RetriveUserInfoController.class.getName()).log(Level.SEVERE, null, ex);
+                    log.debug("JsonProcessingException ........................................" + ex);
+                } catch (IOException ex) {
+                    java.util.logging.Logger.getLogger(RetriveUserInfoController.class.getName()).log(Level.SEVERE, null, ex);
+                    log.debug("IOException ........................................" + ex);
+                }
+            
+           
+     }
+           return dummyList;
+    }
+    @RequestMapping(value= {"/readAndValidate"}, method = RequestMethod.GET,
+            consumes = MediaType.ALL_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+   void  readAndValidate(){
+       sfService.validateUsersLit(null);
+   }
+   
+   
 }
