@@ -36,6 +36,76 @@ import org.hibernate.annotations.Where;
     @NamedQuery(name = "Tblaccount.findAll", query = "SELECT t FROM Tblaccount t")})
 public class Tblaccount implements Serializable {
 
+    /**
+     * @return the apiEmailPersonal
+     */
+    public String getApiEmailPersonal() {
+        return apiEmailPersonal;
+    }
+
+    /**
+     * @param apiEmailPersonal the apiEmailPersonal to set
+     */
+    public void setApiEmailPersonal(String apiEmailPersonal) {
+        this.apiEmailPersonal = apiEmailPersonal;
+    }
+
+    /**
+     * @return the apiEmailBusiness
+     */
+    public String getApiEmailBusiness() {
+        return apiEmailBusiness;
+    }
+
+    /**
+     * @param apiEmailBusiness the apiEmailBusiness to set
+     */
+    public void setApiEmailBusiness(String apiEmailBusiness) {
+        this.apiEmailBusiness = apiEmailBusiness;
+    }
+
+    /**
+     * @return the apiUserIDActive
+     */
+    public Integer getApiUserIDActive() {
+        return apiUserIDActive;
+    }
+
+    /**
+     * @param apiUserIDActive the apiUserIDActive to set
+     */
+    public void setApiUserIDActive(Integer apiUserIDActive) {
+        this.apiUserIDActive = apiUserIDActive;
+    }
+
+    /**
+     * @return the apiUserIDPending
+     */
+    public Integer getApiUserIDPending() {
+        return apiUserIDPending;
+    }
+
+    /**
+     * @param apiUserIDPending the apiUserIDPending to set
+     */
+    public void setApiUserIDPending(Integer apiUserIDPending) {
+        this.apiUserIDPending = apiUserIDPending;
+    }
+
+    /**
+     * @return the apiLastUpdated
+     */
+    public Date getApiLastUpdated() {
+        return apiLastUpdated;
+    }
+
+    /**
+     * @param apiLastUpdated the apiLastUpdated to set
+     */
+    public void setApiLastUpdated(Date apiLastUpdated) {
+        this.apiLastUpdated = apiLastUpdated;
+    }
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -257,6 +327,16 @@ public class Tblaccount implements Serializable {
     private String apiUserId;
      @Column(name = "apiSyncStatus")
     private String apiSyncStatus;
+      @Column(name = "apiEmailPersonal")
+     private String apiEmailPersonal;
+       @Column(name = "apiEmailBusiness")
+     private String apiEmailBusiness;
+        @Column(name = "apiUserIDActive")
+     private Integer apiUserIDActive;
+         @Column(name = "apiUserIDPending")
+     private Integer apiUserIDPending;
+          @Column(name = "apiLastUpdated")
+     private Date apiLastUpdated;
 
 
     public Tblaccount() {
@@ -891,6 +971,20 @@ public class Tblaccount implements Serializable {
      */
     public void setApiSyncStatus(String apiSyncStatus) {
         this.apiSyncStatus = apiSyncStatus;
+    }
+
+    /**
+     * @return the store
+     */
+    public Store getStore() {
+        return store;
+    }
+
+    /**
+     * @param store the store to set
+     */
+    public void setStore(Store store) {
+        this.store = store;
     }
     
 }

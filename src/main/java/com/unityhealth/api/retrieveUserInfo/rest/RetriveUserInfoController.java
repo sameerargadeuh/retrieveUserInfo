@@ -242,9 +242,9 @@ try {
          log.debug("D is ........................................" + dummy.getD());
           log.debug("The next page is at ........................................" + dummy.getD().getNext());
             }
-         Calendar calendar = Calendar.getInstance();
+       
         dummyList.add(dummy);
-        
+          Calendar calendar = Calendar.getInstance();
         SimpleDateFormat dt1 = new SimpleDateFormat("dd-MM-yyyy");
         
           ObjectMapper objectMapper = new ObjectMapper();
