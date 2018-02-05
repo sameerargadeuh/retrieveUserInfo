@@ -26,7 +26,8 @@ public interface IUserReportRepository extends JpaRepository<Tblaccount, Integer
     Tblaccount findByVFirstNameAndVLastNameAndStore_storeNameAndVStatus(String vFirstName, String vLastName,String storeName,String vStatus);
     Tblaccount findByVFirstNameAndVLastNameAndStore_storeNameAndStore_Group_IdNotInAndVStatus(String vFirstName, String vLastName,String storeName,List<Integer> groupIDs,String vStatus);
     Tblaccount findByVFirstNameAndVLastNameAndStore_storeNameAndStore_Group_IdInAndVStatus(String vFirstName, String vLastName,String storeName,List<Integer> groupIDs,String vStatus);
-     @Query("SELECT account FROM Tblaccount account WHERE " +
+    Tblaccount findByVFirstNameAndVLastNameAndStore_Group_IdInAndVStatus(String vFirstName, String vLastName,List<Integer> groupIDs,String vStatus);
+    @Query("SELECT account FROM Tblaccount account WHERE " +
 " (concat(coalesce(trim(account.store.vLocAddress1),''),coalesce(trim(account.store.vLocAddress2),'')) = ?3  AND trim(account.store.vLocLocality1)=?4"
              + " AND trim(account.store.storeRegion)=?5 AND trim(account.store.postCode)=?6 and account.vFirstName=?1 and account.vLastName=?2)"
              + " or "
