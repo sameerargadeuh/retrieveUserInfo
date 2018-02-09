@@ -14,5 +14,7 @@ import java.util.List;
  */
 public interface ProcessDataFromSFService {
     
-    void validateUsersLit(List<Dummy> dataList);
+    //void validateUsersLit(List<Dummy> dataList);
+    
+    void validateUsersLit(String jsonFileName,String excelFileName);
 }

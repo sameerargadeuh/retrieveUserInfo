@@ -22,7 +22,7 @@ public interface IUserReportRepository extends JpaRepository<Tblaccount, Integer
     Tblaccount findByVEmail(String vUserName);
     Tblaccount findByVEmailAndVStatus(String vUserName,String vStatus);
     Tblaccount findByApiUserId(String apiUserId);
-    Tblaccount findByVFirstNameAndVLastNameAndVStatus(String vFirstName, String vLastName,String vStatus);
+    List<Tblaccount> findByVFirstNameAndVLastNameAndVStatus(String vFirstName, String vLastName,String vStatus);
     Tblaccount findByVFirstNameAndVLastNameAndStore_storeNameAndVStatus(String vFirstName, String vLastName,String storeName,String vStatus);
     Tblaccount findByVFirstNameAndVLastNameAndStore_storeNameAndStore_Group_IdNotInAndVStatus(String vFirstName, String vLastName,String storeName,List<Integer> groupIDs,String vStatus);
     Tblaccount findByVFirstNameAndVLastNameAndStore_storeNameAndStore_Group_IdInAndVStatus(String vFirstName, String vLastName,String storeName,List<Integer> groupIDs,String vStatus);

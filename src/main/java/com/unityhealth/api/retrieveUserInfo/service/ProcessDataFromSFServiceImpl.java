@@ -55,12 +55,13 @@ public class ProcessDataFromSFServiceImpl implements ProcessDataFromSFService {
     }
 
     @Override
-    public void validateUsersLit(List<Dummy> dataList) {
+    public void validateUsersLit(String jsonFileName,String excelFileName) {
         FileOutputStream outputStream = null;
+        List<Dummy> dataList = null;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             //file = new File("E:\\biocueticalsload\\product.json");
-            File file = new File("E:\\retrieveUserInfo\\5tfeb200.json");
+            File file = new File("E:\\retrieveUserInfo\\" + jsonFileName);
             long time1 = System.currentTimeMillis();
             try {
                 Dummy singlePage = new Dummy();
@@ -152,8 +153,8 @@ public class ProcessDataFromSFServiceImpl implements ProcessDataFromSFService {
             header.getCell(18).setCellStyle(style);
             header.createCell(19).setCellValue("SF Banner Group");
             header.getCell(19).setCellStyle(style);
-             header.createCell(19).setCellValue("Ithera Banner Group");
-            header.getCell(19).setCellStyle(style);
+             header.createCell(20).setCellValue("Ithera Banner Group");
+            header.getCell(20).setCellStyle(style);
             for (Dummy data : dataList) {
                 userList = data.getD().getResults();
                 for (User user : userList) {
@@ -255,37 +256,52 @@ public class ProcessDataFromSFServiceImpl implements ProcessDataFromSFService {
                                     foundInPriceLinseStoresList.add(user);
                                     if(account.getApiUserId() != null){
                                     account.setApiUserId(user.getUserId());
-                                    buildExcelDocument(workbook, sheet, user, account, "NamesStoresPriceLineGroup", rowCount);
+                                    buildExcelDocument(workbook, sheet, user, account, "NamesStoresPriceLineGroupPending", rowCount);
                                     }else{
                                         buildExcelDocument(workbook, sheet, user, account, "NamesStoresPriceLineGroupPending", rowCount);
                                     }
                                     
                                     }else {
+                                         log.debug("Before Store Check ");
                                         if (storeName != null) {
                                         account = userReportRepository.findByVFirstNameAndVLastNameAndStore_storeNameAndStore_Group_IdNotInAndVStatus(user.getFirstName(), user.getLastName(), storeName, groupIDs, "active");
                                     }
-
+                                            log.debug("After Store Check ");
                                     if (account != null) {
+                                        log.debug("In not a proceline Store Check ");
                                         account.setApiUserId(user.getUserId());
                                         foundInNonPriceLinseStoresUsers.add(user);
                                         log.debug(" Not a PriceLine Store " + user.getFirstName() + "......" + user.getLastName() + "......" + user.getEmail() + "......" + user.getLocation() + "......" + account.getVEmail());
-                                        buildExcelDocument(workbook, sheet, user, account, "NameStorePricelineGroup", rowCount);
+                                        buildExcelDocument(workbook, sheet, user, account, "NameStorePricelineGroupPending", rowCount);
                                     } else {
+                                         log.debug("get by address Check " );
                                         account = userReportRepository.findByAddress(user.getFirstName(), user.getLastName(), user.getAddressLine1(), user.getCity(), user.getState(), user.getZipCode());
+                                  
                                         if (account != null) {
                                             foundInNonPriceLinseStores++;
                                             account.setApiUserId(user.getUserId());
                                             foundByAddressUsers.add(user);
                                             log.debug(" Not a PriceLine Store matched by address  " + user.getFirstName() + "......" + user.getLastName() + "......" + user.getEmail() + "......" + user.getLocation() + "......" + account.getVEmail());
-                                            buildExcelDocument(workbook, sheet, user, account, "NamesMatchedNotPriceLineStore", rowCount);
+                                            buildExcelDocument(workbook, sheet, user, account, "NamesMatchedNotPriceLineStorePending", rowCount);
                                         } else {
-                                            account = userReportRepository.findByVFirstNameAndVLastNameAndVStatus(user.getFirstName(), user.getLastName(), "active");
-                                            if (account != null) {
-                                                account.setApiUserId(user.getUserId());
+                                          //  log.debug("only firstname lastt name check " + user.toString());
+                                            log.debug(" only firstname lastt name check  " + user.getFirstName() + "......" + user.getLastName() + "......" + user.getEmail() + "......" + user.getLocation() + "......" );
+                                           List<Tblaccount> accounts = userReportRepository.findByVFirstNameAndVLastNameAndVStatus(user.getFirstName(), user.getLastName(), "active");
+                                            log.debug("After only firstname lastt name check ");
+                                            
+                                            if (accounts != null) {
+                                                 log.debug("acounts not null ");
+                                                for(Tblaccount singleaccount:accounts){
+                                                    log.debug("how about this acount  " + singleaccount);
+                                                singleaccount.setApiUserId(user.getUserId());
+                                                 log.debug("so is the userid uopdated?..  " + singleaccount.getApiUserId());
+                                                 log.debug("Is the list null?..  " + foundByNameAloneUsers + "...... foundByNameAlone value " + foundByNameAlone ); 
                                                 foundByNameAloneUsers.add(user);
+                                                log.debug("Added to the list as well..  "  );
                                                 foundByNameAlone++;
-                                                log.debug("found by firstnmae last name only Not in the Store they suggest so a " + account.getVEmail() + " ..... account store" + account.getStore().getStoreName());
-                                                buildExcelDocument(workbook, sheet, user, account, "NameMatchOther", rowCount);
+                                                log.debug("found by firstnmae last name only Not in the Store they suggest so a " + singleaccount.getVEmail() + " ..... account store" + singleaccount.getStore().getStoreName());
+                                                buildExcelDocument(workbook, sheet, user, singleaccount, "NameMatchOtherPending", rowCount++);
+                                                }
                                             } else {
                                                 notFountCount++;
                                                 notFoundUsers.add(user);
@@ -319,7 +335,7 @@ public class ProcessDataFromSFServiceImpl implements ProcessDataFromSFService {
             File aFile;
             Calendar calendar = Calendar.getInstance();
             SimpleDateFormat dt1 = new SimpleDateFormat("dd-MM-yyyy");
-            aFile = new File("E:\\retrieveUserInfo\\FileFromSF" + "log" + dt1.format(calendar.getTime()) + ".xlsx");
+            aFile = new File("E:\\retrieveUserInfo\\"+ excelFileName + "log" + dt1.format(calendar.getTime()) + ".xlsx");
             log.debug("afile is ..................." + aFile);
             outputStream = new FileOutputStream(aFile);
             workbook.write(outputStream);
@@ -474,9 +490,10 @@ public class ProcessDataFromSFServiceImpl implements ProcessDataFromSFService {
         }
          userRow.createCell(19).setCellValue(user.getCustom02());
          if(account!=null && account.getStore()!= null && account.getStore().getGroup()!= null  ){
-          userRow.createCell(19).setCellValue(account.getStore().getGroup().getvName());
+          userRow.createCell(20).setCellValue(account.getStore().getGroup().getvName());
+         }else{
+          userRow.createCell(20).setCellValue("");
          }
-          userRow.createCell(19).setCellValue("");
         log.debug(" after postcode  ............ " );
         }catch(Exception e){
             log.debug("some error occurred whle adding row to the sheet" +  e);
@@ -488,9 +505,14 @@ public class ProcessDataFromSFServiceImpl implements ProcessDataFromSFService {
 
     public static void main(String args[]) throws Exception {
 
-        ProcessDataFromSFServiceImpl processDataFromSFServiceImpl = new ProcessDataFromSFServiceImpl(null);
+        //ProcessDataFromSFServiceImpl processDataFromSFServiceImpl = new ProcessDataFromSFServiceImpl(null);
         // processDataFromSFServiceImpl.buildExcelDocument();
+            String vurl = "https://connect.itherapeutics.com.au/p644jwda2o6/";
+           // vurl =  vurl.substring(http://connect.itherapeutics.com.au/, 0);
+           vurl = vurl.replace("https://connect.itherapeutics.com.au/", "");
+//           log.debug(vurl);
 
+System.out.println(vurl);
     }
 
 }
