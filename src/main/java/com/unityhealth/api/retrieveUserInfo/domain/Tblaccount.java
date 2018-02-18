@@ -37,6 +37,34 @@ import org.hibernate.annotations.Where;
 public class Tblaccount implements Serializable {
 
     /**
+     * @return the apiUserPass
+     */
+    public String getApiUserPass() {
+        return apiUserPass;
+    }
+
+    /**
+     * @param apiUserPass the apiUserPass to set
+     */
+    public void setApiUserPass(String apiUserPass) {
+        this.apiUserPass = apiUserPass;
+    }
+
+    /**
+     * @return the apiTmpUserId
+     */
+    public String getApiTmpUserId() {
+        return apiTmpUserId;
+    }
+
+    /**
+     * @param apiTmpUserId the apiTmpUserId to set
+     */
+    public void setApiTmpUserId(String apiTmpUserId) {
+        this.apiTmpUserId = apiTmpUserId;
+    }
+
+    /**
      * @return the apiEmailPersonal
      */
     public String getApiEmailPersonal() {
@@ -116,6 +144,7 @@ public class Tblaccount implements Serializable {
     @NotNull
     @Column(name = "iSite")
     private int iSite;
+    
 //    @Column(name = "iStoreID")
 //    private Integer iStoreID;
     @ManyToOne(fetch= FetchType.EAGER)
@@ -185,6 +214,9 @@ public class Tblaccount implements Serializable {
     @Size(max = 255)
     @Column(name = "vPasswordSalt")
     private String vPasswordSalt;
+    
+    @Column(name = "apiUserPass")
+    private String apiUserPass;
     @Column(name = "dtPasswordUpdated")
     @Temporal(TemporalType.TIMESTAMP)
     private Date dtPasswordUpdated;
@@ -337,7 +369,8 @@ public class Tblaccount implements Serializable {
      private Integer apiUserIDPending;
           @Column(name = "apiLastUpdated")
      private Date apiLastUpdated;
-
+          @Column(name="apiTmpUserId")
+private String apiTmpUserId;
 
     public Tblaccount() {
     }

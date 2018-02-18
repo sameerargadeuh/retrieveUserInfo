@@ -5,6 +5,7 @@
  */
 package com.unityhealth.api.retrieveUserInfo.service;
 
+import com.unityhealth.api.retrieveUserInfo.domain.Tblaccount;
 import com.unityhealth.api.retrieveUserInfo.sf.userModel.Dummy;
 import java.util.List;
 
@@ -17,4 +18,6 @@ public interface ProcessDataFromSFService {
     //void validateUsersLit(List<Dummy> dataList);
     
     void validateUsersLit(String jsonFileName,String excelFileName);
+     public String joinUser( Tblaccount in) ;
+     public void addNewUSersToBreeze();
 }

@@ -1,5 +1,6 @@
 server:
     port: ${port:9080}
+   
     context-path: /
     error.whitelabel.enabled: false
     session.timeout: 60
@@ -7,7 +8,10 @@ server:
       enabled: true
       min-response-size: 1024
       mime-types: text/html, text/xml, text/plain, text/css, application/javascript, application/json
-
+tomcat:
+    ajp.port: 10080
+    ajp.remoteauthentication: false
+    ajp.enabled: true
 security:
   basic:
     enabled: false
@@ -24,11 +28,13 @@ security:
       serviceId: ${PREFIX:}resource
       
 # LOGGING
-# logging.level.org.springframework.security: DEBUG
+logging.level.org.springframework.security: DEBUG
+logging.level.com.unityhealth.api.retrieveUserInfo: DEBUG
 
 logging:
   level:
-    org.springframework.web: INFO
+    
+    org.springframework.web: DEBUG
     root: WARN
     org.hibernate: INFO
   pattern:
@@ -82,6 +88,8 @@ adobeConnectAdmin: info@itherapeutics.com.au
 adobeConnectAdminPassword: qwasz2004!
 adobeConnectApi: https://connect.itherapeutics.com.au/api/xml
 breezeLearnersGroupSCO: 88900
+
+jsonFilePath: E:\\retrieveUserInfo\\
 
 session:
  store-type: none
