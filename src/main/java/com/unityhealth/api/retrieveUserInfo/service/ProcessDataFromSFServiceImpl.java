@@ -359,7 +359,7 @@ public class ProcessDataFromSFServiceImpl implements ProcessDataFromSFService {
                                             account.setApiEmailPersonal(email);
                                             //account.setApiEmailBusiness(email);
                                             account.setApiSyncStatus("NSNPG");
-                                            account.setVStatus("Pending");
+                                           // account.setVStatus("Pending");
                                             account.setApiUserId(user.getUserId());
                                             account.setApiUserIDActive(1);
                                             account.setApiUserIDPending(0);
@@ -382,7 +382,7 @@ public class ProcessDataFromSFServiceImpl implements ProcessDataFromSFService {
                                                 account.setApiEmailPersonal(email);
                                                 //account.setApiEmailBusiness(email);
                                                 account.setApiSyncStatus("NMNPG");
-                                                account.setVStatus("PENDING");
+                                                //account.setVStatus("PENDING");
                                                 account.setApiUserId(user.getUserId());
                                                 account.setApiUserIDActive(1);
                                                 account.setApiUserIDPending(0);
