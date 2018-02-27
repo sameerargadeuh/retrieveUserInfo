@@ -15,35 +15,34 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
-import org.springframework.context.annotation.Primary;
 
 /**
  * Created by shanefox on 10/10/2016.
  */
 @Configuration
 @EnableJpaRepositories(
-    basePackages = "com.unityhealth.api.retrieveUserInfo.domain",
-    entityManagerFactoryRef = "selfDbClientEntityManager",
-    transactionManagerRef = "selfDbClientTransactionManager"
+    basePackages = "com.unityhealth.api.retrieveUserInfo.domain.breeze",
+    entityManagerFactoryRef = "breezeDbClientEntityManager",
+    transactionManagerRef = "breezeDbClientTransactionManager"
 )
-@EntityScan(basePackages = "com.unityhealth.api.retrieveUserInfo.domain")
+@EntityScan(basePackages = "com.unityhealth.api.retrieveUserInfo.domain.breeze")
 @EnableTransactionManagement
-public class SelfJpaConfig {
+public class BreezeJpaConfig {
 
     @Autowired
     private Environment env;
-@Primary
-    @Bean(name = "selfDbClientEntityManager")
-    public LocalContainerEntityManagerFactoryBean produceSelfDbClientEntityManager() {
+
+    @Bean(name = "breezeDbClientEntityManager")
+    public LocalContainerEntityManagerFactoryBean produceBreezeDbClientEntityManager() {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-        em.setDataSource(produceSelfDbClientDataSource());
+        em.setDataSource(produceBreezeDbClientDataSource());
         em.setPackagesToScan("com.unityhealth.api.retrieveUserInfo.domain");
 
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);
         HashMap<String, Object> properties = new HashMap<String, Object>();
-        properties.put("hibernate.hbm2ddl.auto", env.getProperty("selfDbClient.hibernate.hbm2ddl.auto"));
-        properties.put("hibernate.dialect", env.getProperty("selfDbClient.hibernate.dialect"));
+        properties.put("hibernate.hbm2ddl.auto", env.getProperty("breezeDbClient.hibernate.hbm2ddl.auto"));
+        properties.put("hibernate.dialect", env.getProperty("breezeDbClient.hibernate.dialect"));
         properties.put("hibernate.show_sql", false);
         properties.put("javax.persistence.validation.mode", "NONE");
         properties.put("hibernate.enable_lazy_load_no_trans",true);
@@ -52,22 +51,22 @@ public class SelfJpaConfig {
 
         return em;
     }
-@Primary
-    @Bean(name = "selfDbClientDataSource")
-    public DataSource produceSelfDbClientDataSource() {
+
+    @Bean(name = "breezeDbClientDataSource")
+    public DataSource produceBreezeDbClientDataSource() {
         HikariDataSource dataSource = new HikariDataSource();
-        dataSource.setDriverClassName(env.getProperty("selfDbClient.jdbc.driverClassName"));
-        dataSource.setJdbcUrl(env.getProperty("selfDbClient.jdbc.url"));
-        dataSource.setUsername(env.getProperty("selfDbClient.jdbc.username"));
-        dataSource.setPassword(env.getProperty("selfDbClient.jdbc.password"));
-        dataSource.setMaximumPoolSize(env.getProperty("selfDbClient.pool.maxPoolSize", Integer.class));
+        dataSource.setDriverClassName(env.getProperty("breezeDbClient.jdbc.driverClassName"));
+        dataSource.setJdbcUrl(env.getProperty("breezeDbClient.jdbc.url"));
+        dataSource.setUsername(env.getProperty("breezeDbClient.jdbc.username"));
+        dataSource.setPassword(env.getProperty("breezeDbClient.jdbc.password"));
+        dataSource.setMaximumPoolSize(env.getProperty("breezeDbClient.pool.maxPoolSize", Integer.class));
         return dataSource;
     }
-@Primary
-    @Bean(name = "selfDbClientTransactionManager")
-    public PlatformTransactionManager produceSelfDbClientTransactionManager() {
+
+    @Bean(name = "breezeDbClientTransactionManager")
+    public PlatformTransactionManager produceBreezeDbClientTransactionManager() {
         JpaTransactionManager transactionManager = new JpaTransactionManager();
-        transactionManager.setEntityManagerFactory(produceSelfDbClientEntityManager().getObject());
+        transactionManager.setEntityManagerFactory(produceBreezeDbClientEntityManager().getObject());
         return transactionManager;
     }
 
